@@ -6,15 +6,22 @@ public class Movement : MonoBehaviour
 {
     [SerializeField] float mainThrust = 100f;
     [SerializeField] float rotationThrust = 100f;
-    Rigidbody rb;
+    [SerializeField] AudioClip mainEngine;
 
-    // Start is called before the first frame update
+    [SerializeField] ParticleSystem engineParticlesLeft;
+    [SerializeField] ParticleSystem engineParticlesRight;
+
+    Rigidbody rb;
+    AudioSource audioSource;
+
+    bool isAlive;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        audioSource = GetComponent<AudioSource>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         ProcessThrust();
@@ -23,22 +30,63 @@ public class Movement : MonoBehaviour
 
     void ProcessThrust()
     {
-        if (Input.GetKey(KeyCode.Space)) 
+        if (Input.GetKey(KeyCode.Space))
         {
-            rb.AddRelativeForce(Vector3.up * mainThrust * Time.deltaTime);
+            StartThrusting();
+
         }
+        else
+        {
+            StopThrusting();
+        }
+    }
+
+    void StartThrusting()
+    {
+        rb.AddRelativeForce(Vector3.up * mainThrust * Time.deltaTime);
+
+        if (!audioSource.isPlaying)
+        {
+            audioSource.PlayOneShot(mainEngine);
+        }
+
+        if (!engineParticlesLeft.isPlaying)
+        {
+            engineParticlesLeft.Play();
+        }
+        if (!engineParticlesRight.isPlaying)
+        {
+            engineParticlesRight.Play();
+        }
+    }
+
+    void StopThrusting()
+    {
+        audioSource.Stop();
+        engineParticlesLeft.Stop();
+        engineParticlesRight.Stop();
     }
 
     void ProcessRotation()
     {
         if (Input.GetKey(KeyCode.A))
         {
-            ApplyRotation(rotationThrust);
+            RotateLeft();
         }
-        else if (Input.GetKey(KeyCode.D)) 
+        else if (Input.GetKey(KeyCode.D))
         {
-            ApplyRotation(-rotationThrust);
+            RotateRight();
         }
+    }
+
+    void RotateLeft()
+    {
+        ApplyRotation(rotationThrust);
+    }
+
+    void RotateRight()
+    {
+        ApplyRotation(-rotationThrust);
     }
 
     void ApplyRotation(float rotationThisFrame)
